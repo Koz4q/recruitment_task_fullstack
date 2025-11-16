@@ -1,0 +1,13 @@
+rates:
+    path: /api/rates
+    controller: App\Controller\Api\RateController::getRates
+    methods: [GET]
+
+rates_history:
+    path: /api/rates/{code}/history
+    controller: App\Controller\Api\RateController::getHistoricalRates
+    methods: [GET]
+
+setupcheck:
+    path: /api/setup-check
+    controller: App\Controller\DefaultController::setupCheck

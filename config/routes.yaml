@@ -1,19 +1,11 @@
-#home:
-#  path: /
-#  defaults: { _controller: 'AppBundle\Controller\DefaultController::indexAction' }
-#  methods:  GET
-#
+# config/routes.yaml
 
-setupcheck:
-    path: /api/setup-check
-    controller: App\Controller\DefaultController::setupCheck
+# 1.  importujemy trasy API.
+#    Symfony sprawdzi je jako pierwsze.
+api:
+    resource: 'routes/api_routes.yaml'
 
-index:
-    path: /{wildcard}
-    defaults: {
-        _controller: App\Controller\DefaultController::index
-    }
-    requirements:
-        wildcard: .*
-    # controller: App\Controller\DefaultController::index
-
+# 2.  importujemy trasę "catch-all".
+#    Zostanie sprawdzona tylko, jeśli żadna trasa API nie pasowała.
+frontend:
+    resource: 'routes/frontend_routes.yaml'

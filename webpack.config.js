@@ -1,4 +1,5 @@
 const Encore = require('@symfony/webpack-encore');
+const webpack = require('webpack'); // 1. Zachowujemy import modułu Webpack
 
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
@@ -11,45 +12,30 @@ Encore
     .setOutputPath('public/build/')
     // public path used by the web server to access the output path
     .setPublicPath('/build')
-    // only needed for CDN's or subdirectory deploy
-    //.setManifestKeyPrefix('build/')
-
-    /*
-     * ENTRY CONFIG
-     *
-     * Each entry will result in one JavaScript file (e.g. app.js)
-     * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
-     */
+    
     .addEntry('app', './assets/js/app.js')
-
-    // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
-    //.enableStimulusBridge('./assets/controllers.json')
-
-    // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
-
-    // will require an extra script tag for runtime.js
-    // but, you probably want this, unless you're building a single-page app
     .enableSingleRuntimeChunk()
-    //.disableSingleRuntimeChunk()
 
     /*
      * FEATURE CONFIG
-     *
-     * Enable & configure other features below. For a full
-     * list of features, see:
-     * https://symfony.com/doc/current/frontend.html#adding-more-features
      */
     .cleanupOutputBeforeBuild()
     .enableBuildNotifications()
     .enableSourceMaps(!Encore.isProduction())
-    // enables hashed filenames (e.g. app.abc123.css)
     .enableVersioning(Encore.isProduction())
 
     // configure Babel
-    // .configureBabel((config) => {
-    //     config.plugins.push('@babel/a-babel-plugin');
-    // })
+    // 2. Używamy .configureBabel, aby ustawić 'classic' runtime
+    .configureBabel((config) => {
+        // Znajdź preset Reacta dodany przez .enableReactPreset()
+        config.presets.forEach(preset => {
+            if (Array.isArray(preset) && preset[0].includes('@babel/preset-react')) {
+                // Wymuś 'classic' runtime
+                preset[1] = { ...preset[1], runtime: 'classic' };
+            }
+        });
+    })
 
     // enables and configure @babel/preset-env polyfills
     .configureBabelPresetEnv((config) => {
@@ -64,10 +50,16 @@ Encore
     //.enableTypeScriptLoader()
 
     // uncomment if you use React
+    // 3. Wracamy do prostego wywołania, które nie przerywa łańcucha
     .enableReactPreset()
+    
+    // 4. POPRAWIONA SKŁADNIA: Używamy .addPlugin() zamiast .configure()
+    // Wstrzykujemy React jako globalną zmienną (naprawia ReferenceError: React is not defined)
+    .addPlugin(new webpack.ProvidePlugin({
+        React: 'react',
+    }))
 
     // uncomment to get integrity="..." attributes on your script & link tags
-    // requires WebpackEncoreBundle 1.4 or higher
     //.enableIntegrityHashes(Encore.isProduction())
 
     // uncomment if you're having problems with a jQuery plugin
